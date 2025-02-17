@@ -1,0 +1,128 @@
+import pygame
+import random
+
+# Initialize pygame
+pygame.init()
+
+# Screen dimensions
+SCREEN_WIDTH = 600
+SCREEN_HEIGHT = 600
+
+# Colors
+BLACK = (0, 0, 0)
+YELLOW = (255, 255, 0)
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+PINK = (255, 184, 255)
+CYAN = (0, 255, 255)
+WHITE = (255, 255, 255)
+
+# Create the screen
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Pac-Man Game")
+
+# Clock for controlling the frame rate
+clock = pygame.time.Clock()
+
+# Load images
+pacman_img = pygame.image.load("tiles.png")  # Replace with your Pac-Man image
+ghost_img = pygame.image.load("/Users/adityachaubey/Pictures/Photos Library.photoslibrary/originals/B/B0FF4BAF-9189-4EF0-A01F-176AE74F6486.jpeg")  # Replace with your ghost image
+
+# Pac-Man class
+class PacMan:
+    def __init__(self):
+        self.image = pacman_img
+        self.rect = self.image.get_rect()
+        self.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        self.speed = 5
+
+    def move(self, dx, dy):
+        self.rect.x += dx * self.speed
+        self.rect.y += dy * self.speed
+
+        # Keep Pac-Man within the screen boundaries
+        if self.rect.left < 0:
+            self.rect.left = 0
+        if self.rect.right > SCREEN_WIDTH:
+            self.rect.right = SCREEN_WIDTH
+        if self.rect.top < 0:
+            self.rect.top = 0
+        if self.rect.bottom > SCREEN_HEIGHT:
+            self.rect.bottom = SCREEN_HEIGHT
+
+    def draw(self):
+        screen.blit(self.image, self.rect)
+
+# Ghost class
+class Ghost:
+    def __init__(self, color):
+        self.image = ghost_img
+        self.rect = self.image.get_rect()
+        self.rect.center = (random.randint(50, SCREEN_WIDTH - 500), random.randint(500, SCREEN_HEIGHT - 50))
+        self.speed = random.randint(2, 4)
+        self.color = color
+
+    def move(self):
+        self.rect.x += random.choice([-1, 1]) * self.speed
+        self.rect.y += random.choice([-1, 1]) * self.speed
+
+        # Keep ghost within the screen boundaries
+        if self.rect.left < 0:
+            self.rect.left = 0
+        if self.rect.right > SCREEN_WIDTH:
+            self.rect.right = SCREEN_WIDTH
+        if self.rect.top < 0:
+            self.rect.top = 0
+        if self.rect.bottom > SCREEN_HEIGHT:
+            self.rect.bottom = SCREEN_HEIGHT
+
+    def draw(self):
+        screen.blit(self.image, self.rect)
+
+# Create Pac-Man and ghosts
+pacman = PacMan()
+ghosts = [Ghost(RED), Ghost(BLUE), Ghost(PINK), Ghost(CYAN)]
+
+# Game loop
+running = True
+while running:
+    # Handle events
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    # Move Pac-Man
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        pacman.move(-1, 0)
+    if keys[pygame.K_RIGHT]:
+        pacman.move(1, 0)
+    if keys[pygame.K_UP]:
+        pacman.move(0, -1)
+    if keys[pygame.K_DOWN]:
+        pacman.move(0, 1)
+
+    # Move ghosts
+    for ghost in ghosts:
+        ghost.move()
+
+    # Check for collisions
+    for ghost in ghosts:
+        if pacman.rect.colliderect(ghost.rect):
+            print("Game Over!")
+            running = False
+
+    # Draw everything
+    screen.fill(BLACK)
+    pacman.draw()
+    for ghost in ghosts:
+        ghost.draw()
+
+    # Update the display
+    pygame.display.flip()
+
+    # Cap the frame rate
+    clock.tick(300)
+
+# Quit pygame
+pygame.quit()
